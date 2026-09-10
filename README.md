@@ -2,10 +2,11 @@
 
 > A thread through an unfamiliar codebase.
 
-Forked from [CoreCoder](https://github.com/he-yufeng/CoreCoder) by Yufeng He (MIT),
-then rebuilt as a full-stack code-reading tool: a FastAPI backend streaming over
-SSE, a React client that shows the agent's tool calls as they happen, local
-embedding-based semantic search, and a structural project overview computed
+Developed on top of [CoreCoder](https://github.com/he-yufeng/CoreCoder) (MIT),
+whose minimal agent loop is the engine underneath. Ariadne builds it out into a
+full-stack tool for reading code: a FastAPI backend that streams a run over SSE,
+a React client that shows each tool call as the agent makes it, semantic search
+over a locally built index, and a structural overview of any project computed
 without a model call.
 
 Point it at a project and ask questions. It reads files, searches, and explains —
