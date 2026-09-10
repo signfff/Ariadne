@@ -811,3 +811,51 @@ pre {
 .chat-section {
   grid-template-rows: minmax(0, 1fr);
 }
+
+/* ---- app shell: the window never scrolls, panels scroll inside ----
+   A `1fr` track only bounds its child if every ancestor can shrink; without
+   min-height:0 the track falls back to content height, which is why opening a
+   project stretched the chat column and grew the page instead of scrolling
+   the message list. The chain below is pinned at each level. */
+
+html,
+body {
+  height: 100%;
+}
+
+.reader-shell {
+  height: 100vh;
+  height: 100dvh; /* mobile browsers: exclude the collapsing toolbar */
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main-panel,
+.reader-grid,
+.preview,
+.chat-section,
+.chat-panel,
+.chat-log,
+.code-viewer,
+.code-body,
+.file-list {
+  min-height: 0;
+}
+
+.reader-grid {
+  overflow: hidden;
+}
+
+@media (max-width: 980px) {
+  /* stacked, there is no room for two full-height panes - let the page scroll */
+  .reader-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .left-rail {
+    max-height: none;
+    overflow: visible;
+  }
+}
