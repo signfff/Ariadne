@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, FolderOpen, Loader2, RefreshCw, Server } from 'lucide-react';
+import { AlertTriangle, FolderOpen, LayoutList, Loader2, RefreshCw, Server, FileCode2 } from 'lucide-react';
 
-import { getHealth, openProject, readFile, streamChat } from './api.js';
+import { getHealth, getOverview, openProject, readFile, streamChat } from './api.js';
 import ChatPanel from './components/ChatPanel.jsx';
 import CodeViewer from './components/CodeViewer.jsx';
 import FileTree from './components/FileTree.jsx';
+import OverviewPanel from './components/OverviewPanel.jsx';
 
 export default function App() {
   const [health, setHealth] = useState(null);
@@ -12,6 +13,11 @@ export default function App() {
   const [project, setProject] = useState(null);
   const [projectError, setProjectError] = useState('');
   const [opening, setOpening] = useState(false);
+
+  const [tab, setTab] = useState('overview');
+  const [overview, setOverview] = useState(null);
+  const [overviewError, setOverviewError] = useState('');
+  const [overviewLoading, setOverviewLoading] = useState(false);
 
   const [selected, setSelected] = useState('');
   const [file, setFile] = useState(null);
@@ -49,12 +55,22 @@ export default function App() {
     if (!pathInput.trim() || opening) return;
     setOpening(true);
     setProjectError('');
+    setOverview(null);
+    setOverviewError('');
     try {
       const data = await openProject(pathInput.trim());
       setProject(data);
-      setSelected(data.files.find((f) => f.previewable)?.path || '');
+      setSelected('');
+      setFile(null);
       setMessages([]);
+      setTab('overview');
       sessionRef.current = `web-${Date.now()}`;
+
+      setOverviewLoading(true);
+      getOverview(data.root)
+        .then(setOverview)
+        .catch((err) => setOverviewError(err.message))
+        .finally(() => setOverviewLoading(false));
     } catch (err) {
       setProjectError(err.message);
       setProject(null);
@@ -63,11 +79,16 @@ export default function App() {
     }
   }
 
-  async function handleSend() {
-    const message = draft.trim();
+  function openFile(path) {
+    setSelected(path);
+    setTab('code');
+  }
+
+  async function handleSend(preset) {
+    const message = (typeof preset === 'string' ? preset : draft).trim();
     if (!message || !project || streaming) return;
 
-    setDraft('');
+    if (typeof preset !== 'string') setDraft('');
     setStreaming(true);
     setMessages((prev) => [
       ...prev,
@@ -174,41 +195,54 @@ export default function App() {
 
         {runtime && !runtime.api_key_present && (
           <p className="notice">
-            <AlertTriangle size={13} /> 服务端没读到 API Key，提问会失败。设好环境变量后重启服务器。
+            <AlertTriangle size={13} /> 没读到 API Key，概览可用，提问会失败。
           </p>
         )}
 
-        {project && (
-          <>
-            <div className="metric-row">
-              <div className="metric">
-                <span>文件</span>
-                <strong>{project.stats.file_count}</strong>
-              </div>
-              <div className="metric">
-                <span>主要类型</span>
-                <strong>{project.stats.top_exts.slice(0, 2).map((t) => t.ext).join(' ')}</strong>
-              </div>
-            </div>
-            <FileTree files={project.files} selected={selected} onSelect={setSelected} />
-          </>
-        )}
+        {project && <FileTree files={project.files} selected={selected} onSelect={openFile} />}
       </aside>
 
       <main className="main-panel">
         <header className="reader-topbar">
-          <div>
-            <strong>{project ? project.root : '未打开项目'}</strong>
-            {truncated && <span className="badge">文件过多，已截断</span>}
+          <div className="topbar-tabs">
+            <button
+              type="button"
+              className={tab === 'overview' ? 'is-active' : ''}
+              onClick={() => setTab('overview')}
+              disabled={!project}
+            >
+              <LayoutList size={14} /> 项目概览
+            </button>
+            <button
+              type="button"
+              className={tab === 'code' ? 'is-active' : ''}
+              onClick={() => setTab('code')}
+              disabled={!project}
+            >
+              <FileCode2 size={14} /> {selected || '代码'}
+            </button>
           </div>
-          <button type="button" className="refresh" onClick={handleOpen} disabled={!project || opening}>
-            <RefreshCw size={13} /> 重新扫描
-          </button>
+
+          <div className="topbar-right">
+            {truncated && <span className="badge">文件过多，已截断</span>}
+            <button type="button" className="refresh" onClick={handleOpen} disabled={!project || opening}>
+              <RefreshCw size={13} /> 重新扫描
+            </button>
+          </div>
         </header>
 
         <div className="reader-grid">
           <section className="preview">
-            <CodeViewer path={selected} file={file} loading={fileLoading} error={fileError} />
+            {tab === 'overview' ? (
+              <OverviewPanel
+                data={overview}
+                loading={overviewLoading}
+                error={overviewError}
+                onOpenFile={openFile}
+              />
+            ) : (
+              <CodeViewer path={selected} file={file} loading={fileLoading} error={fileError} />
+            )}
           </section>
           <section className="chat-section">
             <ChatPanel
@@ -221,6 +255,7 @@ export default function App() {
               onSend={handleSend}
               onStop={handleStop}
               disabled={!project}
+              selectedFile={selected}
             />
           </section>
         </div>

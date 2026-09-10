@@ -23,6 +23,7 @@ async function post(path, body, signal) {
 export const getHealth = () => fetch('/api/health').then((r) => r.json());
 export const openProject = (path) => post('/api/project', { path });
 export const readFile = (path, file) => post('/api/file', { path, file });
+export const getOverview = (path) => post('/api/overview', { path });
 
 /**
  * Split an SSE frame into its event name and parsed payload.

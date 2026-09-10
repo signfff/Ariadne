@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from corecoder import __version__
 from corecoder.config import Config
 
+from . import overview as overview_mod
 from . import projects
 from .agent_stream import build_agent, stream_agent
 from .schemas import (
@@ -92,6 +93,20 @@ def read_file(req: FileRequest):
         return projects.read_file(root, req.file)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.post("/api/overview")
+def project_overview(req: ProjectRequest):
+    """Structural read of the project: languages, entry points, what depends on what.
+
+    Pure static analysis - no model call, so this works before a key is set.
+    """
+    try:
+        root = projects.resolve_root(req.path)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    return overview_mod.build_overview(root)
 
 
 @app.post("/api/index")

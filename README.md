@@ -105,6 +105,22 @@ through the `search_code` tool, which every read-only profile has.
 | `CORECODER_EMBED_MODEL` | `BAAI/bge-small-zh-v1.5` | Embedding model |
 | `HF_ENDPOINT` | HuggingFace | Mirror for weight downloads |
 
+## Project overview
+
+Opening a project first shows a structural read of it, computed from the files
+alone - no model call, so it is instant, free, and works before a key is set:
+
+- what it is written in, and how much of each
+- where execution starts, including console scripts declared in `pyproject.toml`
+- **which modules everything else is built on**, ranked by how many other files
+  import them - a better guide to what matters than size or commit count
+- a **reading route** derived from that graph: docs, then config, then entry
+  points, then the load-bearing modules, each with the reason it is there
+- files nothing imports and that import nothing, which can wait
+
+Every row opens that file. Because the route comes from the import graph rather
+than the model, it cannot cite a file that does not exist.
+
 ## Profiles
 
 | Profile | Tools | For |
@@ -114,7 +130,10 @@ through the `search_code` tool, which every read-only profile has.
 | `review` | read / glob / grep / search_code | Finding bugs, risks, and missing tests |
 | `full` | + write / edit / bash / sub-agent | When you also want it to change things |
 
-The three read-only profiles answer in Chinese by default and cite the files they read.
+The three read-only profiles answer in Chinese by default and cite the files
+they read. Each one carries its own openers - reading route, concept glossary,
+explain this file, review this file - so the difference between them is visible
+rather than buried in a system prompt.
 
 ## How it works
 

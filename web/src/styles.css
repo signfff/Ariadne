@@ -859,3 +859,293 @@ body {
     overflow: visible;
   }
 }
+
+/* ==========================================================================
+   Project overview and profile starters.
+   ========================================================================== */
+
+.topbar-tabs {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.topbar-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 46vw;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #5e6a79;
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-tabs button.is-active {
+  border-color: #d8e0ea;
+  background: #eef4f8;
+  color: #1d3f4f;
+  font-weight: 600;
+}
+
+.topbar-tabs button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.overview-panel {
+  overflow: auto;
+  padding: 18px;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.ov-pad {
+  padding: 14px;
+}
+
+.ov-block h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  color: #1d3f4f;
+}
+
+.ov-block h3 svg {
+  align-self: center;
+  flex: none;
+}
+
+.ov-block h3 small {
+  color: #8794a6;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.ov-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ov-totals span {
+  display: block;
+  color: #687689;
+  font-size: 12px;
+}
+
+.ov-totals strong {
+  display: block;
+  margin-top: 3px;
+  color: #202733;
+  font-size: 20px;
+}
+
+.lang-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #eef2f6;
+}
+
+/* one hue rotated per segment - no palette to keep in sync with the data */
+.lang-seg {
+  background: #315f72;
+}
+
+.lang-seg:nth-child(2) { background: #4f8ba3; }
+.lang-seg:nth-child(3) { background: #7ab0c4; }
+.lang-seg:nth-child(4) { background: #a8ccd8; }
+.lang-seg:nth-child(5) { background: #cfe2e9; }
+.lang-seg:nth-child(n + 6) { background: #e3ecf0; }
+
+.lang-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 9px;
+  color: #5e6a79;
+  font-size: 12px;
+}
+
+.lang-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: #315f72;
+}
+
+.lang-legend span:nth-child(2) i { background: #4f8ba3; }
+.lang-legend span:nth-child(3) i { background: #7ab0c4; }
+.lang-legend span:nth-child(4) i { background: #a8ccd8; }
+.lang-legend span:nth-child(5) i { background: #cfe2e9; }
+
+/* ---- clickable lists ---- */
+
+.route-steps,
+.module-list,
+.orphan-list {
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+
+.route-steps button,
+.module-list button,
+.orphan-list button {
+  display: grid;
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #e6ecf2;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+
+.route-steps button:hover,
+.module-list button:hover,
+.orphan-list button:hover {
+  border-color: #a8ccd8;
+  background: #f6fafc;
+}
+
+.route-steps button {
+  grid-template-columns: 22px minmax(0, 1fr) 14px;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-no {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #eef4f8;
+  color: #1d3f4f;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.step-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.route-steps code,
+.module-list code,
+.orphan-list code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1d3f4f;
+  font-size: 12.5px;
+  font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+}
+
+.route-steps em,
+.module-list em {
+  color: #687689;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.route-steps small {
+  color: #97a3b4;
+  font-size: 11.5px;
+}
+
+.module-list button {
+  gap: 3px;
+}
+
+.mod-meta {
+  color: #8794a6;
+  font-size: 11.5px;
+}
+
+.mod-meta b {
+  margin-right: 8px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #eef4f8;
+  color: #1d3f4f;
+  font-size: 11px;
+}
+
+/* ---- profile starters ---- */
+
+.chat-intro {
+  display: grid;
+  gap: 12px;
+}
+
+.starter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 14px;
+}
+
+.starter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.starter-grid button,
+.starter-row button {
+  width: auto;
+  height: auto;
+  padding: 9px 12px;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d3f4f;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.starter-row button {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.starter-grid button:hover:not(:disabled),
+.starter-row button:hover:not(:disabled) {
+  border-color: #7ab0c4;
+  background: #f6fafc;
+}
+
+.starter-grid button:disabled,
+.starter-row button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
