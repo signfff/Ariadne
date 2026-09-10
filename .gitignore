@@ -1,0 +1,32 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.env
+.venv/
+venv/
+node_modules/
+.mypy_cache/
+.ruff_cache/
+.corecoder_history
+.DS_Store
+.pytest_cache/
+.tmp/
+
+# pytest 临时目录（本地遗留，部分权限异常）
+.pytest_tmp/
+.pytest_tmp_cache/
+.pytest_tmp_cache_run/
+.pytest_tmp_run/
+
+# 本地诊断脚本
+_diagnose.py
+
+# RAG 索引产物
+*.db
+*.sqlite3
+.corecoder_index/

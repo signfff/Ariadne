@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CoreCoder Reading Lab</title>
+  <style>
+    :root {
+      --bg: #1b1b2f;
+      --panel: #f7e8c9;
+      --panel-2: #fff5d8;
+      --ink: #1f2430;
+      --muted: #6b5f54;
+      --line: #1f2430;
+      --blue: #3a86ff;
+      --green: #2fbf71;
+      --red: #ef476f;
+      --yellow: #ffd166;
+      --shadow: #0f1020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(45deg, rgba(255,255,255,.04) 25%, transparent 25%) 0 0 / 16px 16px,
+        linear-gradient(-45deg, rgba(255,255,255,.04) 25%, transparent 25%) 0 0 / 16px 16px,
+        var(--bg);
+      font: 14px/1.5 "Courier New", ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+    button, input, select {
+      font: inherit;
+    }
+    .app {
+      min-height: 100vh;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+    }
+    header {
+      border: 3px solid var(--line);
+      background: var(--panel);
+      box-shadow: 6px 6px 0 var(--shadow);
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 320px minmax(360px, 1fr);
+      gap: 16px;
+      align-items: end;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto auto;
+      gap: 8px;
+    }
+    input, select {
+      height: 38px;
+      border: 3px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      padding: 0 10px;
+      outline: none;
+    }
+    button {
+      min-height: 38px;
+      border: 3px solid var(--line);
+      background: var(--yellow);
+      color: var(--ink);
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 3px 3px 0 var(--shadow);
+    }
+    button:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 var(--shadow);
+    }
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .secondary { background: var(--panel-2); }
+    .primary { background: var(--green); }
+    .danger { background: var(--red); color: #fff; }
+    main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 300px minmax(420px, 1fr) 340px;
+      gap: 14px;
+    }
+    .panel {
+      min-width: 0;
+      min-height: 0;
+      border: 3px solid var(--line);
+      background: var(--panel);
+      box-shadow: 6px 6px 0 var(--shadow);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+    .reader {
+      grid-template-rows: auto 1fr;
+    }
+    .side {
+      grid-template-rows: auto auto auto 1fr auto;
+    }
+    .title {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 3px solid var(--line);
+      background: var(--blue);
+      color: #fff;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .title span:last-child {
+      color: #eaf2ff;
+      font-size: 12px;
+      text-transform: none;
+    }
+    .stats {
+      padding: 12px;
+      border-bottom: 3px solid var(--line);
+      background: var(--panel-2);
+      color: var(--muted);
+      display: grid;
+      gap: 6px;
+    }
+    .stats strong { color: var(--ink); }
+    .file-list {
+      min-height: 0;
+      overflow: auto;
+      padding: 8px;
+    }
+    .file {
+      width: 100%;
+      display: block;
+      text-align: left;
+      margin-bottom: 6px;
+      background: var(--panel-2);
+      box-shadow: 2px 2px 0 var(--shadow);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file.active {
+      background: var(--green);
+    }
+    .file[disabled] {
+      opacity: .45;
+      background: #ddd0b2;
+    }
+    .content {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+      background: var(--panel-2);
+    }
+    .placeholder {
+      color: var(--muted);
+      max-width: 720px;
+    }
+    .report {
+      color: var(--ink);
+    }
+    .report h2 {
+      margin: 0 0 14px;
+      padding-bottom: 6px;
+      border-bottom: 3px solid var(--line);
+      font-size: 20px;
+      line-height: 1.35;
+    }
+    .report h3 {
+      margin: 20px 0 8px;
+      color: #0d4f8b;
+      font-size: 16px;
+    }
+    .report p {
+      margin: 0 0 10px;
+    }
+    .report ul {
+      margin: 0 0 14px 22px;
+      padding: 0;
+    }
+    .report li {
+      margin: 5px 0;
+    }
+    .report code, .code-output {
+      background: #151827;
+      color: #f7e8c9;
+      padding: 1px 4px;
+    }
+    .code-output {
+      display: block;
+      min-height: 100%;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .actions {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      border-bottom: 3px solid var(--line);
+      background: var(--panel-2);
+    }
+    .hint {
+      padding: 12px;
+      border-bottom: 3px solid var(--line);
+      color: var(--muted);
+      background: #ead7ad;
+    }
+    .runtime {
+      padding: 12px;
+      border-bottom: 3px solid var(--line);
+      background: #151827;
+      color: #f7e8c9;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+    .events {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+    }
+    .event {
+      border: 3px solid var(--line);
+      background: var(--panel-2);
+      padding: 8px;
+      margin-bottom: 8px;
+      box-shadow: 2px 2px 0 var(--shadow);
+    }
+    .event strong { color: #0d4f8b; }
+    .event code {
+      display: block;
+      margin-top: 5px;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .status {
+      min-height: 84px;
+      border-top: 3px solid var(--line);
+      padding: 12px;
+      color: var(--muted);
+      background: var(--panel-2);
+      overflow-wrap: anywhere;
+    }
+    .ok { color: #126b3a; }
+    .error { color: var(--red); }
+    @media (max-width: 1120px) {
+      header { grid-template-columns: 1fr; }
+      main { grid-template-columns: 270px minmax(0, 1fr); }
+      .side { display: none; }
+    }
+    @media (max-width: 760px) {
+      .app { padding: 10px; }
+      .toolbar { grid-template-columns: 1fr; }
+      main { grid-template-columns: 1fr; }
+      .file-list { max-height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>CoreCoder Reading Lab</h1>
+        <div class="subtitle">像素风源码教学工作台 · 先读懂，再动手</div>
+      </div>
+      <div class="toolbar">
+        <input id="path" placeholder="项目路径，例如 D:\develop\CoreCoder-main">
+        <button id="pickBtn" class="secondary">选择文件夹</button>
+        <button id="openBtn" class="primary">打开项目</button>
+      </div>
+    </header>
+
+    <main>
+      <aside class="panel">
+        <div class="title"><span>Files</span><span id="projectName">未打开</span></div>
+        <div class="stats" id="stats">
+          <div>输入路径后打开项目。</div>
+        </div>
+        <div class="file-list" id="files"></div>
+      </aside>
+
+      <section class="panel reader">
+        <div class="title"><span id="mainTitle">教学导读</span><span id="modeLabel">read-only</span></div>
+        <div class="content">
+          <div id="output" class="placeholder">
+            打开项目后，右侧可以选择不同的教学任务：生成总览、阅读路线、解释当前文件、概念词典和练习题。
+          </div>
+        </div>
+      </section>
+
+      <section class="panel side">
+        <div class="title"><span>Teaching</span><span id="toolCount">0 calls</span></div>
+        <div class="actions">
+          <button id="guideBtn" class="primary">生成项目总览</button>
+          <button id="routeBtn">生成阅读路线</button>
+          <button id="fileBtn">讲解当前文件</button>
+          <button id="glossaryBtn">生成概念词典</button>
+          <button id="quizBtn">生成练习题</button>
+        </div>
+        <div class="hint" id="selectionHint">当前未选择文件。</div>
+        <div class="runtime" id="runtime">模型环境：未检测</div>
+        <div class="events" id="events"></div>
+        <div class="status" id="status">等待操作。</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let currentRoot = "";
+    let selectedFile = "";
+    let files = [];
+
+    async function api(path, body) {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "request failed");
+      return data;
+    }
+
+    function setBusy(isBusy) {
+      for (const id of ["openBtn", "pickBtn", "guideBtn", "routeBtn", "fileBtn", "glossaryBtn", "quizBtn"]) {
+        $(id).disabled = isBusy || (id.endsWith("Btn") && id !== "openBtn" && id !== "pickBtn" && !currentRoot);
+      }
+      $("fileBtn").disabled = isBusy || !currentRoot || !selectedFile;
+    }
+
+    function status(text, cls = "") {
+      $("status").className = "status " + cls;
+      $("status").textContent = text;
+    }
+
+    function renderStats(stats) {
+      const exts = stats.top_exts.map(([ext, count]) => `${ext}: ${count}`).join("  ");
+      $("stats").innerHTML = `
+        <div><strong>${stats.file_count}</strong> files</div>
+        <div>${formatBytes(stats.total_size)}</div>
+        <div>${exts || "no extension data"}</div>
+      `;
+    }
+
+    function renderFiles() {
+      const box = $("files");
+      box.innerHTML = "";
+      files.forEach((file) => {
+        const btn = document.createElement("button");
+        btn.className = "file" + (file.path === selectedFile ? " active" : "");
+        btn.textContent = file.path;
+        btn.title = file.previewable ? file.path : "文件过大或不是常见文本格式";
+        btn.disabled = !file.previewable;
+        btn.onclick = () => previewFile(file.path);
+        box.appendChild(btn);
+      });
+    }
+
+    function renderEvents(events) {
+      $("toolCount").textContent = `${events.length} calls`;
+      $("events").innerHTML = events.map((ev) => `
+        <div class="event">
+          <strong>${escapeHtml(ev.name)}</strong>
+          <code>${escapeHtml(JSON.stringify(ev.arguments))}</code>
+        </div>
+      `).join("");
+    }
+
+    async function openProject() {
+      const path = $("path").value.trim();
+      if (!path) return status("请先输入项目路径。", "error");
+      setBusy(true);
+      status("正在扫描项目文件...");
+      try {
+        const data = await api("/api/open", {path});
+        currentRoot = data.root;
+        selectedFile = "";
+        files = data.files;
+        $("path").value = currentRoot;
+        $("projectName").textContent = data.name;
+        $("selectionHint").textContent = "当前未选择文件。";
+        renderStats(data.stats);
+        renderFiles();
+        renderEvents([]);
+        $("mainTitle").textContent = "教学导读";
+        $("output").className = "placeholder";
+        $("output").textContent = `已打开 ${data.root}\n\n右侧选择一个教学任务开始。`;
+        status("项目已打开。", "ok");
+      } catch (e) {
+        status(e.message, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function pickFolder() {
+      setBusy(true);
+      status("正在打开文件夹选择器...");
+      try {
+        const data = await api("/api/pick-folder", {path: $("path").value.trim()});
+        if (data.path) {
+          $("path").value = data.path;
+          await openProject();
+        } else {
+          status("已取消选择。");
+        }
+      } catch (e) {
+        status(e.message + " 可以直接在输入框填写路径。", "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function previewFile(file) {
+      if (!currentRoot) return;
+      setBusy(true);
+      status(`正在读取 ${file}...`);
+      try {
+        const data = await api("/api/file", {path: currentRoot, file});
+        selectedFile = data.file;
+        $("selectionHint").textContent = `当前文件：${selectedFile}`;
+        $("mainTitle").textContent = data.file;
+        $("output").className = "code-output";
+        $("output").textContent = data.content;
+        renderFiles();
+        status("文件已读取。可以点击“讲解当前文件”。", "ok");
+      } catch (e) {
+        status(e.message, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function teach(action) {
+      if (!currentRoot) return status("请先打开项目。", "error");
+      if (action === "file" && !selectedFile) return status("请先从左侧选择一个文件。", "error");
+
+      const titles = {
+        guide: "项目总览",
+        route: "阅读路线",
+        file: "文件讲解",
+        glossary: "概念词典",
+        quiz: "练习题"
+      };
+      setBusy(true);
+      renderEvents([]);
+      $("mainTitle").textContent = titles[action];
+      $("output").className = "placeholder";
+      $("output").textContent = "CoreCoder 正在按教学模式阅读项目...";
+      status("生成中。需要有效 API key。");
+      try {
+        const data = await api("/api/teach", {path: currentRoot, action, file: selectedFile});
+        $("output").className = "report";
+        $("output").innerHTML = renderMarkdown(data.report || "(empty report)");
+        renderEvents(data.tools || []);
+        const tok = data.tokens ? ` Tokens: ${data.tokens.total}` : "";
+        if (data.offline) {
+          status(`模型调用失败，已使用离线教学模式。原因：${data.error || "未知错误"}`, "error");
+        } else {
+          status(`生成完成。${tok}`, "ok");
+        }
+      } catch (e) {
+        $("output").className = "placeholder";
+        $("output").textContent = "生成失败。右侧状态栏里有错误信息。";
+        status(e.message, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function formatBytes(n) {
+      if (n < 1024) return `${n} B`;
+      if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+      return `${(n / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[ch]);
+    }
+
+    function renderMarkdown(markdown) {
+      const lines = String(markdown).split(/\r?\n/);
+      const html = [];
+      let inList = false;
+      function closeList() {
+        if (inList) {
+          html.push("</ul>");
+          inList = false;
+        }
+      }
+      for (const rawLine of lines) {
+        const line = rawLine.trimEnd();
+        if (!line.trim()) {
+          closeList();
+          continue;
+        }
+        if (line.startsWith("### ")) {
+          closeList();
+          html.push(`<h3>${inlineMarkdown(line.slice(4))}</h3>`);
+        } else if (line.startsWith("## ")) {
+          closeList();
+          html.push(`<h2>${inlineMarkdown(line.slice(3))}</h2>`);
+        } else if (line.startsWith("# ")) {
+          closeList();
+          html.push(`<h2>${inlineMarkdown(line.slice(2))}</h2>`);
+        } else if (/^[-*]\s+/.test(line)) {
+          if (!inList) {
+            html.push("<ul>");
+            inList = true;
+          }
+          html.push(`<li>${inlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>`);
+        } else {
+          closeList();
+          html.push(`<p>${inlineMarkdown(line)}</p>`);
+        }
+      }
+      closeList();
+      return html.join("");
+    }
+
+    function inlineMarkdown(text) {
+      return escapeHtml(text)
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    }
+
+    async function init() {
+      try {
+        const res = await fetch("/api/config", {cache: "no-store"});
+        const data = await res.json();
+        $("path").value = data.cwd || "";
+        renderRuntime(data.runtime || {});
+      } catch (_) {}
+      $("openBtn").onclick = openProject;
+      $("pickBtn").onclick = pickFolder;
+      $("guideBtn").onclick = () => teach("guide");
+      $("routeBtn").onclick = () => teach("route");
+      $("fileBtn").onclick = () => teach("file");
+      $("glossaryBtn").onclick = () => teach("glossary");
+      $("quizBtn").onclick = () => teach("quiz");
+      setBusy(false);
+    }
+
+    function renderRuntime(runtime) {
+      const keyState = runtime.api_key_present ? "API key: 已读取" : "API key: 未读取";
+      const base = runtime.base_url || "默认 OpenAI";
+      $("runtime").textContent = `${keyState} | model: ${runtime.model || "?"} | base: ${base} | provider: ${runtime.provider || "openai"}`;
+    }
+
+    init();
+  </script>
+</body>
+</html>
