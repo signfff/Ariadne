@@ -54,13 +54,20 @@ corecoder -p "这个项目的入口在哪，主流程怎么走的"   # one-shot
 corecoder -r <session-id>                    # resume a saved session
 ```
 
-Browser:
+API server (FastAPI, streams over SSE):
+
+```bash
+pip install -e ".[server]"
+python -m uvicorn server.main:app --reload    # http://127.0.0.1:8000
+```
+
+Interactive API docs at `http://127.0.0.1:8000/docs`.
+
+Legacy browser UI (stdlib server, no streaming — being replaced by the React client):
 
 ```bash
 corecoder-web        # then open http://127.0.0.1:8765
 ```
-
-Pick a folder, browse the file tree, and let the agent walk you through the project.
 
 ## Profiles
 
@@ -84,8 +91,14 @@ corecoder/
 ├── session.py    # save/resume conversations under ~/.corecoder/sessions
 ├── prompt.py     # system prompt
 ├── cli.py        # terminal REPL
-├── web.py        # stdlib HTTP server + JSON API
+├── web.py        # legacy stdlib server (superseded by server/)
 └── tools/        # bash, read_file, write_file, edit_file, glob, grep, agent
+
+server/
+├── main.py         # FastAPI app
+├── agent_stream.py # blocking agent loop -> SSE event stream
+├── projects.py     # project scanning and file reads
+└── schemas.py      # Pydantic request/response models
 ```
 
 `Agent.chat()` is the whole thing: ask the model, run whatever tools it asks for,
