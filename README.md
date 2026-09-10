@@ -54,30 +54,22 @@ corecoder -p "这个项目的入口在哪，主流程怎么走的"   # one-shot
 corecoder -r <session-id>                    # resume a saved session
 ```
 
-API server (FastAPI, streams over SSE):
+Browser — build once, then one command serves the API and the UI on one port:
 
 ```bash
 pip install -e ".[server]"
-python -m uvicorn server.main:app --reload    # http://127.0.0.1:8000
+cd web && npm install && npm run build && cd ..
+corecoder-server                  # http://127.0.0.1:8000
 ```
 
 Interactive API docs at `http://127.0.0.1:8000/docs`.
 
-React client (second terminal):
+Developing the client instead? Run Vite for hot reload — it proxies `/api` back
+to the server, so the browser still sees a single origin:
 
 ```bash
-cd web
-npm install
-npm run dev        # http://127.0.0.1:5173
-```
-
-Vite proxies `/api` to the server, so the browser sees a single origin and the
-SSE stream passes through untouched.
-
-Legacy browser UI (stdlib server, no streaming — being replaced by the React client):
-
-```bash
-corecoder-web        # then open http://127.0.0.1:8765
+corecoder-server                  # terminal 1
+cd web && npm run dev             # terminal 2 -> http://127.0.0.1:5173
 ```
 
 ## Semantic search

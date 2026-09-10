@@ -67,3 +67,8 @@ def test_chat_emits_sse_frames(client, tmp_path, monkeypatch):
     assert frames[0].startswith("event: tool_start\ndata: ")
     assert frames[2] == 'event: token\ndata: {"text": "入口在"}'
     assert "入口在 cli.py" in frames[3]
+
+
+def test_unknown_api_route_is_not_swallowed_by_the_ui_mount(client):
+    """The SPA mount sits at '/', so it must not answer for missing API paths."""
+    assert client.get("/api/nope").status_code == 404

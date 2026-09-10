@@ -13,6 +13,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from corecoder import __version__
 from corecoder.config import Config
@@ -200,6 +201,26 @@ def chat(req: ChatRequest):
             "X-Accel-Buffering": "no",  # stop nginx buffering the stream
         },
     )
+
+
+# Serving the built client from the API process gives one command and one
+# origin - the shape you would actually deploy, and the one to demo from.
+# In development Vite serves the client instead, with hot reload, and proxies
+# /api back here. Mounted last so it never shadows an API route.
+WEB_DIST = Path(__file__).resolve().parent.parent / "web" / "dist"
+
+if WEB_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=WEB_DIST, html=True), name="ui")
+else:
+
+    @app.get("/")
+    def missing_ui():
+        return {
+            "message": "API is running, but the client has not been built.",
+            "build": "cd web && npm install && npm run build",
+            "dev": "cd web && npm run dev  (then open http://127.0.0.1:5173)",
+            "docs": "/docs",
+        }
 
 
 def main():
