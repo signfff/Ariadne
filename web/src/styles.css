@@ -184,7 +184,7 @@ button {
 
 .metric-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -213,6 +213,9 @@ button {
   margin-top: 6px;
   font-size: 18px;
   overflow-wrap: anywhere;
+  /* the card is white but sits inside the dark rail, so the inherited near-white
+     text was invisible; state the colour instead of inheriting it */
+  color: #202733;
 }
 
 .section-block {
@@ -408,7 +411,14 @@ pre {
 }
 
 .warn {
-  color: #f0a04b;
+  /* readable on the white metric card, not on the dark rail */
+  color: #b45309;
+}
+
+/* .error-text is dark red for the white chat panel; on the dark rail that is
+   nearly invisible, so lighten it there */
+.left-rail .error-text {
+  color: #ff9d92;
 }
 
 .notice {
