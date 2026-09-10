@@ -218,6 +218,21 @@ def chat(req: ChatRequest):
     )
 
 
+@app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+def unknown_api_route(rest: str):
+    """Answer unknown /api paths clearly.
+
+    Without this they fall through to the static mount below, which serves GET
+    only and so rejects a POST with 405 Method Not Allowed - which reads as
+    "wrong verb" when the real cause is usually a stale server missing a route
+    added since it started.
+    """
+    raise HTTPException(
+        status_code=404,
+        detail=f"No API route /api/{rest}. If it exists in the source, restart the server.",
+    )
+
+
 # Serving the built client from the API process gives one command and one
 # origin - the shape you would actually deploy, and the one to demo from.
 # In development Vite serves the client instead, with hot reload, and proxies

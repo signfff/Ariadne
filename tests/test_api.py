@@ -72,3 +72,16 @@ def test_chat_emits_sse_frames(client, tmp_path, monkeypatch):
 def test_unknown_api_route_is_not_swallowed_by_the_ui_mount(client):
     """The SPA mount sits at '/', so it must not answer for missing API paths."""
     assert client.get("/api/nope").status_code == 404
+
+
+def test_unknown_api_route_reports_404_for_every_verb(client):
+    """The UI mount serves GET only, so a POST to a missing route used to 405."""
+    for call in (client.get, client.post, client.put, client.delete):
+        res = call("/api/definitely-not-a-route")
+        assert res.status_code == 404, f"{call.__name__} returned {res.status_code}"
+        assert "restart the server" in res.json()["detail"]
+
+
+def test_real_api_routes_still_win_over_the_catch_all(client, tmp_path):
+    assert client.post("/api/project", json={"path": str(tmp_path)}).status_code == 200
+    assert client.post("/api/overview", json={"path": str(tmp_path)}).status_code == 200

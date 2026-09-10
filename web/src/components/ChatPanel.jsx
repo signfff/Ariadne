@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Bot, Loader2, Send, Square, User } from 'lucide-react';
+import Answer from './Answer.jsx';
 import ToolTimeline from './ToolTimeline.jsx';
 
 /**
@@ -52,6 +53,8 @@ export default function ChatPanel({
   onStop,
   disabled,
   selectedFile,
+  files,
+  onOpenFile,
 }) {
   const endRef = useRef(null);
   const active = PROFILES.find((p) => p.id === profile) ?? PROFILES[0];
@@ -96,7 +99,12 @@ export default function ChatPanel({
             <div className="bubble-icon">{msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}</div>
             <div className="bubble-body">
               {msg.role === 'assistant' && <ToolTimeline tools={msg.tools || []} />}
-              {msg.text && <div className="bubble-text">{msg.text}</div>}
+              {msg.text &&
+                (msg.role === 'assistant' ? (
+                  <Answer text={msg.text} files={files} onOpenFile={onOpenFile} />
+                ) : (
+                  <div className="bubble-text">{msg.text}</div>
+                ))}
               {msg.error && <div className="error-text">{msg.error}</div>}
               {msg.usage && (
                 <div className="usage">

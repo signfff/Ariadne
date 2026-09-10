@@ -1149,3 +1149,128 @@ body {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* ---- rendered answers ---- */
+
+.answer-md {
+  font-size: 14px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.answer-md > :first-child { margin-top: 0; }
+.answer-md > :last-child { margin-bottom: 0; }
+
+.answer-md p,
+.answer-md ul,
+.answer-md ol {
+  margin: 0 0 10px;
+}
+
+.answer-md ul,
+.answer-md ol {
+  padding-left: 22px;
+}
+
+.answer-md li {
+  margin-bottom: 3px;
+}
+
+/* the model's headings sit inside a bubble, so they read as bold labels
+   rather than page-level headings */
+.md-h {
+  margin: 16px 0 7px;
+  color: #1d3f4f;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.answer-md h5.md-h {
+  font-size: 13px;
+  color: #405065;
+}
+
+.inline-code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #eef2f6;
+  color: #1d3f4f;
+  font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+  font-size: 12.5px;
+}
+
+/* a citation the project actually contains - click to open it */
+.cite {
+  padding: 1px 6px;
+  border: 1px solid #cfe2e9;
+  border-radius: 4px;
+  background: #eef4f8;
+  color: #1d3f4f;
+  font-family: Consolas, "SFMono-Regular", ui-monospace, monospace;
+  font-size: 12.5px;
+}
+
+.cite:hover {
+  border-color: #7ab0c4;
+  background: #dceaf0;
+}
+
+.md-code {
+  margin: 0 0 10px;
+  padding: 11px 13px;
+  border: 1px solid #e6ecf2;
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow-x: auto;
+  white-space: pre;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.answer-md blockquote {
+  margin: 0 0 10px;
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid #d8e0ea;
+  color: #5e6a79;
+}
+
+.md-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.answer-md table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.answer-md th,
+.answer-md td {
+  padding: 6px 10px;
+  border: 1px solid #e6ecf2;
+  text-align: left;
+}
+
+.answer-md th {
+  background: #f6fafc;
+}
+
+.answer-md a {
+  color: #245b70;
+}
+
+.answer-md hr {
+  margin: 14px 0;
+  border: 0;
+  border-top: 1px solid #e6ecf2;
+}
+
+/* the line a citation pointed at */
+.code-line.is-cited {
+  background: #fff6dd;
+}
+
+.code-line.is-cited .ln {
+  color: #7b4e00;
+  font-weight: 600;
+}

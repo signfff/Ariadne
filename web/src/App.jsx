@@ -20,6 +20,7 @@ export default function App() {
   const [overviewLoading, setOverviewLoading] = useState(false);
 
   const [selected, setSelected] = useState('');
+  const [jumpLine, setJumpLine] = useState(null);
   const [file, setFile] = useState(null);
   const [fileLoading, setFileLoading] = useState(false);
   const [fileError, setFileError] = useState('');
@@ -79,8 +80,9 @@ export default function App() {
     }
   }
 
-  function openFile(path) {
+  function openFile(path, line) {
     setSelected(path);
+    setJumpLine(line ?? null);
     setTab('code');
   }
 
@@ -148,6 +150,7 @@ export default function App() {
     abortRef.current?.abort();
   }
 
+  const filePaths = project?.files?.map((f) => f.path);
   const runtime = health?.runtime;
   const truncated = project?.files?.[0]?.truncated_listing;
 
@@ -241,7 +244,13 @@ export default function App() {
                 onOpenFile={openFile}
               />
             ) : (
-              <CodeViewer path={selected} file={file} loading={fileLoading} error={fileError} />
+              <CodeViewer
+                path={selected}
+                file={file}
+                loading={fileLoading}
+                error={fileError}
+                jumpLine={jumpLine}
+              />
             )}
           </section>
           <section className="chat-section">
@@ -256,6 +265,8 @@ export default function App() {
               onStop={handleStop}
               disabled={!project}
               selectedFile={selected}
+              files={filePaths}
+              onOpenFile={openFile}
             />
           </section>
         </div>
