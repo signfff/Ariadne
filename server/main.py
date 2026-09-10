@@ -1,6 +1,6 @@
 """FastAPI application.
 
-Replaces the old stdlib `corecoder.web` server.  Two things it does that the
+Replaces the old stdlib `ariadne.web` server.  Two things it does that the
 old one could not: stream the agent token by token over SSE, and report the
 real error when a model call fails instead of hiding it behind a fallback.
 """
@@ -15,8 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from corecoder import __version__
-from corecoder.config import Config
+from ariadne_code import __version__
+from ariadne_code.config import Config
 
 from . import overview as overview_mod
 from . import projects
@@ -31,7 +31,7 @@ from .schemas import (
 )
 
 app = FastAPI(
-    title="CoreCoder API",
+    title="Ariadne API",
     description="Read-only code-reading agent over a project folder.",
     version=__version__,
 )
@@ -56,7 +56,7 @@ def health():
 
     config = Config.from_env()
     return HealthResponse(
-        app="CoreCoder",
+        app="Ariadne",
         version=__version__,
         cwd=os.getcwd(),
         profiles=["learn", "ask", "review"],
@@ -112,7 +112,7 @@ def project_overview(req: ProjectRequest):
 @app.post("/api/index")
 def build_project_index(req: IndexRequest):
     """Build or refresh the semantic index. Runs locally - no API key, no cost."""
-    from corecoder.rag import Embedder, EmbedderUnavailable, build_index, index_path, open_store
+    from ariadne_code.rag import Embedder, EmbedderUnavailable, build_index, index_path, open_store
 
     try:
         root = projects.resolve_root(req.path)
@@ -145,7 +145,7 @@ def build_project_index(req: IndexRequest):
 @app.post("/api/search")
 def search_project(req: SearchRequest):
     """Hybrid semantic + keyword search over the index."""
-    from corecoder.rag import Embedder, EmbedderUnavailable, hybrid_search, index_path, open_store
+    from ariadne_code.rag import Embedder, EmbedderUnavailable, hybrid_search, index_path, open_store
 
     try:
         root = projects.resolve_root(req.path)
@@ -254,12 +254,12 @@ else:
 
 
 def main():
-    """Entry point for `corecoder-server`."""
+    """Entry point for `ariadne-server`."""
     import argparse
 
     import uvicorn
 
-    parser = argparse.ArgumentParser(prog="corecoder-server", description="Run the CoreCoder API server.")
+    parser = argparse.ArgumentParser(prog="ariadne-server", description="Run the Ariadne API server.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--reload", action="store_true", help="Auto-reload on code changes")

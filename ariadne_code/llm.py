@@ -6,7 +6,7 @@ provider by changing OPENAI_BASE_URL + OPENAI_API_KEY. That's it.
 
 For providers that are NOT OpenAI-compatible (AWS Bedrock, Google Vertex,
 etc.), use the LiteLLM backend which routes to 100+ providers through a
-single unified interface. Set CORECODER_PROVIDER=litellm.
+single unified interface. Set ARIADNE_PROVIDER=litellm.
 """
 
 import json
@@ -86,15 +86,15 @@ def _rates_for(model: str) -> tuple[float, float] | None:
     """Per-million-token (input, output) rates for a model, or None if unknown.
 
     Gateways and proxies rename models freely, so the built-in table cannot
-    cover every deployment. CORECODER_PRICING supplies rates for whatever the
+    cover every deployment. ARIADNE_PRICING supplies rates for whatever the
     endpoint actually serves:
 
-        CORECODER_PRICING="deepseek-v4-pro:0.55,2.19; deepseek-flash:0.1,0.4"
+        ARIADNE_PRICING="deepseek-v4-pro:0.55,2.19; deepseek-flash:0.1,0.4"
 
     Reporting nothing is better than reporting a made-up number, so an unknown
     model yields None and the UI simply omits the cost.
     """
-    for entry in os.getenv("CORECODER_PRICING", "").split(";"):
+    for entry in os.getenv("ARIADNE_PRICING", "").split(";"):
         entry = entry.strip()
         if not entry or ":" not in entry:
             continue
@@ -244,7 +244,7 @@ class LiteLLM(LLM):
     a single interface to switch between any provider by changing
     the model string.
 
-    Set CORECODER_PROVIDER=litellm and use LiteLLM model strings
+    Set ARIADNE_PROVIDER=litellm and use LiteLLM model strings
     like ``anthropic/claude-3-haiku``, ``bedrock/anthropic.claude-v2``,
     ``vertex_ai/gemini-pro``, etc.
     """

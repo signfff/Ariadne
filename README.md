@@ -1,6 +1,12 @@
-# CoreCoder
+# Ariadne
 
-A minimal, read-first AI agent for **understanding codebases**.
+> A thread through an unfamiliar codebase.
+
+Forked from [CoreCoder](https://github.com/he-yufeng/CoreCoder) by Yufeng He (MIT),
+then rebuilt as a full-stack code-reading tool: a FastAPI backend streaming over
+SSE, a React client that shows the agent's tool calls as they happen, local
+embedding-based semantic search, and a structural project overview computed
+without a model call.
 
 Point it at a project and ask questions. It reads files, searches, and explains —
 in read-only modes it cannot write, edit, or run commands, so it is safe to aim at
@@ -25,11 +31,11 @@ export OPENAI_API_KEY=sk-...
 
 # DeepSeek
 export OPENAI_API_KEY=sk-... OPENAI_BASE_URL=https://api.deepseek.com
-export CORECODER_MODEL=deepseek-chat
+export ARIADNE_MODEL=deepseek-chat
 
 # Ollama (local, no key needed)
 export OPENAI_API_KEY=ollama OPENAI_BASE_URL=http://localhost:11434/v1
-export CORECODER_MODEL=qwen2.5-coder
+export ARIADNE_MODEL=qwen2.5-coder
 ```
 
 Claude Code style variables (`ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`,
@@ -37,22 +43,22 @@ Claude Code style variables (`ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`,
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `CORECODER_API_KEY` / `OPENAI_API_KEY` | — | API key |
+| `ARIADNE_API_KEY` / `OPENAI_API_KEY` | — | API key |
 | `OPENAI_BASE_URL` | provider default | API endpoint |
-| `CORECODER_MODEL` | `gpt-5.5` | Model name |
-| `CORECODER_MAX_CONTEXT` | `128000` | Context budget before compression kicks in |
-| `CORECODER_PROVIDER` | `openai` | Set to `litellm` for non-OpenAI-compatible providers |
-| `CORECODER_PRICING` | — | Token rates for models the built-in table does not know, e.g. `model-a:0.55,2.19; model-b:0.1,0.4` (USD per million in,out) |
+| `ARIADNE_MODEL` | `gpt-5.5` | Model name |
+| `ARIADNE_MAX_CONTEXT` | `128000` | Context budget before compression kicks in |
+| `ARIADNE_PROVIDER` | `openai` | Set to `litellm` for non-OpenAI-compatible providers |
+| `ARIADNE_PRICING` | — | Token rates for models the built-in table does not know, e.g. `model-a:0.55,2.19; model-b:0.1,0.4` (USD per million in,out) |
 
 ## Use
 
 Terminal:
 
 ```bash
-corecoder                                    # interactive REPL
-corecoder --profile learn                    # read-only, explain-this-project mode
-corecoder -p "这个项目的入口在哪，主流程怎么走的"   # one-shot
-corecoder -r <session-id>                    # resume a saved session
+ariadne                                    # interactive REPL
+ariadne --profile learn                    # read-only, explain-this-project mode
+ariadne -p "这个项目的入口在哪，主流程怎么走的"   # one-shot
+ariadne -r <session-id>                    # resume a saved session
 ```
 
 Browser — build once, then one command serves the API and the UI on one port:
@@ -60,7 +66,7 @@ Browser — build once, then one command serves the API and the UI on one port:
 ```bash
 pip install -e ".[server]"
 cd web && npm install && npm run build && cd ..
-corecoder-server                  # http://127.0.0.1:8000
+ariadne-server                  # http://127.0.0.1:8000
 ```
 
 Interactive API docs at `http://127.0.0.1:8000/docs`.
@@ -69,7 +75,7 @@ Developing the client instead? Run Vite for hot reload — it proxies `/api` bac
 to the server, so the browser still sees a single origin:
 
 ```bash
-corecoder-server                  # terminal 1
+ariadne-server                  # terminal 1
 cd web && npm run dev             # terminal 2 -> http://127.0.0.1:5173
 ```
 
@@ -80,13 +86,13 @@ code that does X" - the question you actually have in an unfamiliar repo.
 
 ```bash
 pip install -e ".[rag]"
-corecoder-index            # index the current folder
-corecoder-index --rebuild  # start over
+ariadne-index            # index the current folder
+ariadne-index --rebuild  # start over
 ```
 
 Indexing runs **entirely on your machine** - a small ONNX embedding model on the
 CPU. No API key, no per-token cost, and your chat provider's quota is untouched.
-The index is one SQLite file under `.corecoder_index/`, and re-running only
+The index is one SQLite file under `.ariadne_index/`, and re-running only
 re-embeds files whose contents changed.
 
 The model weights download from HuggingFace on first use. If that is blocked:
@@ -102,7 +108,7 @@ through the `search_code` tool, which every read-only profile has.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `CORECODER_EMBED_MODEL` | `BAAI/bge-small-zh-v1.5` | Embedding model |
+| `ARIADNE_EMBED_MODEL` | `BAAI/bge-small-zh-v1.5` | Embedding model |
 | `HF_ENDPOINT` | HuggingFace | Mirror for weight downloads |
 
 ## Project overview
@@ -138,16 +144,16 @@ rather than buried in a system prompt.
 ## How it works
 
 ```
-corecoder/
+ariadne/
 ├── agent.py      # the loop: LLM → tool calls → execute → feed back → repeat
 ├── llm.py        # OpenAI-compatible + LiteLLM backends, streaming, retry, cost
 ├── context.py    # 3-layer compression: snip tool output → summarize → collapse
 ├── profiles.py   # named tool sets + behavior instructions
-├── session.py    # save/resume conversations under ~/.corecoder/sessions
+├── session.py    # save/resume conversations under ~/.ariadne/sessions
 ├── prompt.py     # system prompt
 ├── cli.py        # terminal REPL
 ├── web.py        # legacy stdlib server (superseded by server/)
-├── index_cli.py  # `corecoder-index`
+├── index_cli.py  # `ariadne-index`
 ├── rag/
 │   ├── chunker.py  # split by AST, embed a prose card rather than raw source
 │   ├── embedder.py # local ONNX embeddings
@@ -189,7 +195,7 @@ append the results, ask again — until it replies with plain text.
 ```bash
 pip install -e ".[dev]"     # pulls in the server and rag extras too
 pytest tests/ -q
-ruff check corecoder server tests
+ruff check ariadne_code server tests
 ```
 
 ## License

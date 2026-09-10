@@ -7,8 +7,8 @@ without downloading a model or hitting any network.
 import numpy as np
 import pytest
 
-from corecoder.rag.chunker import chunk_file, is_indexable
-from corecoder.rag.indexer import _is_test, build_index, hybrid_search, open_store
+from ariadne_code.rag.chunker import chunk_file, is_indexable
+from ariadne_code.rag.indexer import _is_test, build_index, hybrid_search, open_store
 
 DIM = 32
 
@@ -94,7 +94,7 @@ def test_generated_files_are_not_indexable(project):
 def test_test_files_are_recognised():
     assert _is_test("tests/test_core.py")
     assert _is_test("web/src/App.test.jsx")
-    assert not _is_test("corecoder/agent.py")
+    assert not _is_test("ariadne_code/agent.py")
 
 
 # ---- store and retrieval ------------------------------------------------

@@ -1,1 +1,1 @@
-"""FastAPI backend for the CoreCoder code-reading workspace."""
+"""FastAPI backend for the Ariadne code-reading workspace."""

@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 
 DEFAULT_MODEL = "BAAI/bge-small-zh-v1.5"
-CACHE_DIR = Path.home() / ".corecoder" / "models"
+CACHE_DIR = Path.home() / ".ariadne" / "models"
 
 # BGE models are trained with an instruction on the query side only. fastembed's
 # query_embed does not add it for this model - it measured identical to embed() -
@@ -29,7 +29,7 @@ class Embedder:
     """Wraps one fastembed model. Loaded lazily so importing is cheap."""
 
     def __init__(self, model_name: str = DEFAULT_MODEL, cache_dir: Path | None = None):
-        self.model_name = os.getenv("CORECODER_EMBED_MODEL") or model_name
+        self.model_name = os.getenv("ARIADNE_EMBED_MODEL") or model_name
         self.cache_dir = cache_dir or CACHE_DIR
         self._model = None
 

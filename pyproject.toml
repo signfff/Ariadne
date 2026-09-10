@@ -3,14 +3,17 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "corecoder"
+name = "ariadne-code"
 version = "0.4.0"
 description = "A minimal, read-first AI agent for understanding codebases, with a terminal REPL and a browser UI."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "Yufeng He", email = "40085740+he-yufeng@users.noreply.github.com" },
+    { name = "Zhang Weiqi", email = "vdsfsdtest@datavolt.biz" },
+]
+maintainers = [
+    { name = "Zhang Weiqi", email = "vdsfsdtest@datavolt.biz" },
 ]
 keywords = ["ai", "agent", "code-reading", "code-review", "cli", "web-ui", "llm"]
 classifiers = [
@@ -35,7 +38,7 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["corecoder", "server"]
+packages = ["ariadne_code", "server"]
 
 [project.optional-dependencies]
 litellm = ["litellm>=1.60.0,<2.0.0"]
@@ -48,7 +51,7 @@ rag = [
     "numpy>=1.24",
 ]
 dev = [
-    "corecoder[server,rag]",
+    "ariadne[server,rag]",
     "pytest>=7.0",
     "httpx>=0.27",
     # pinned: ruff's default rule set widens between releases, and an
@@ -57,14 +60,14 @@ dev = [
 ]
 
 [project.scripts]
-corecoder = "corecoder.cli:main"
-corecoder-server = "server.main:main"
-corecoder-index = "corecoder.index_cli:main"
+ariadne = "ariadne_code.cli:main"
+ariadne-server = "server.main:main"
+ariadne-index = "ariadne_code.index_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/he-yufeng/CoreCoder"
-Repository = "https://github.com/he-yufeng/CoreCoder"
-Issues = "https://github.com/he-yufeng/CoreCoder/issues"
+Homepage = "https://github.com/signfff/Ariadne"
+Repository = "https://github.com/signfff/Ariadne"
+Issues = "https://github.com/signfff/Ariadne/issues"
 
 [tool.ruff]
 line-length = 130

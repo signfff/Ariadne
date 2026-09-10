@@ -1,10 +1,10 @@
 """Tests for core modules: config, context, session, imports."""
 
-from corecoder import ALL_TOOLS, LLM, PROFILES, Agent, Config, __version__, tools_for_profile
-from corecoder import session as session_module
-from corecoder.context import ContextManager, estimate_tokens
-from corecoder.session import list_sessions, load_session, save_session
-from corecoder.tools import get_tool
+from ariadne_code import ALL_TOOLS, LLM, PROFILES, Agent, Config, __version__, tools_for_profile
+from ariadne_code import session as session_module
+from ariadne_code.context import ContextManager, estimate_tokens
+from ariadne_code.session import list_sessions, load_session, save_session
+from ariadne_code.tools import get_tool
 
 
 def test_version():
@@ -21,16 +21,16 @@ def test_public_api_exports():
 
 
 def test_config_from_env(monkeypatch):
-    monkeypatch.setenv("CORECODER_MODEL", "test-model")
+    monkeypatch.setenv("ARIADNE_MODEL", "test-model")
     c = Config.from_env()
     assert c.model == "test-model"
 
 
 def test_config_defaults(monkeypatch):
     # clear relevant env vars without leaking the change into other tests
-    monkeypatch.delenv("CORECODER_MODEL", raising=False)
+    monkeypatch.delenv("ARIADNE_MODEL", raising=False)
     monkeypatch.delenv("ANTHROPIC_MODEL", raising=False)
-    monkeypatch.delenv("CORECODER_MAX_TOKENS", raising=False)
+    monkeypatch.delenv("ARIADNE_MAX_TOKENS", raising=False)
 
     c = Config.from_env()
     assert c.model == "gpt-5.5"
@@ -39,12 +39,12 @@ def test_config_defaults(monkeypatch):
 
 
 def test_config_accepts_anthropic_style_env(monkeypatch):
-    monkeypatch.delenv("CORECODER_API_KEY", raising=False)
+    monkeypatch.delenv("ARIADNE_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
-    monkeypatch.delenv("CORECODER_MODEL", raising=False)
+    monkeypatch.delenv("ARIADNE_MODEL", raising=False)
     monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
-    monkeypatch.delenv("CORECODER_BASE_URL", raising=False)
+    monkeypatch.delenv("ARIADNE_BASE_URL", raising=False)
     monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "sk-test")
     monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://api.deepseek.com/anthropic")
     monkeypatch.setenv("ANTHROPIC_MODEL", "deepseek-v4-pro[1m]")
@@ -56,10 +56,10 @@ def test_config_accepts_anthropic_style_env(monkeypatch):
     assert c.model == "deepseek-v4-pro[1m]"
 
 
-def test_corecoder_env_takes_priority_over_anthropic_env(monkeypatch):
-    monkeypatch.setenv("CORECODER_API_KEY", "core-key")
-    monkeypatch.setenv("CORECODER_BASE_URL", "https://core.example/v1")
-    monkeypatch.setenv("CORECODER_MODEL", "core-model")
+def test_ariadne_env_takes_priority_over_anthropic_env(monkeypatch):
+    monkeypatch.setenv("ARIADNE_API_KEY", "core-key")
+    monkeypatch.setenv("ARIADNE_BASE_URL", "https://core.example/v1")
+    monkeypatch.setenv("ARIADNE_MODEL", "core-model")
     monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "anthropic-key")
     monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://api.deepseek.com/anthropic")
     monkeypatch.setenv("ANTHROPIC_MODEL", "anthropic-model")
@@ -167,7 +167,7 @@ def test_list_sessions():
 # --- Cost estimation ---
 
 def test_cost_estimation_known_model():
-    from corecoder.llm import LLM
+    from ariadne_code.llm import LLM
     llm = LLM.__new__(LLM)
     llm.model = "gpt-5.4"
     llm.total_prompt_tokens = 1_000_000
@@ -177,7 +177,7 @@ def test_cost_estimation_known_model():
     assert cost == 2.5 + 7.5  # $2.5/M in + $15/M out * 0.5M
 
 def test_cost_estimation_unknown_model():
-    from corecoder.llm import LLM
+    from ariadne_code.llm import LLM
     llm = LLM.__new__(LLM)
     llm.model = "some-custom-model"
     llm.total_prompt_tokens = 1000
@@ -188,7 +188,7 @@ def test_cost_estimation_unknown_model():
 # --- Changed files tracking ---
 
 def test_edit_tracks_changed_files(tmp_path):
-    from corecoder.tools.edit import _changed_files
+    from ariadne_code.tools.edit import _changed_files
     _changed_files.clear()
     edit = get_tool("edit_file")
     path = tmp_path / "sample.py"
@@ -199,7 +199,7 @@ def test_edit_tracks_changed_files(tmp_path):
 
 
 def test_write_tracks_changed_files(tmp_path):
-    from corecoder.tools.edit import _changed_files
+    from ariadne_code.tools.edit import _changed_files
     _changed_files.clear()
     write = get_tool("write_file")
     path = tmp_path / "tracked.txt"
@@ -236,7 +236,7 @@ def test_full_profile_exposes_all_tools():
 
 def test_exec_tool_distinguishes_bad_args_from_internal_error():
     """A TypeError raised inside a tool must not be reported as bad arguments."""
-    from corecoder.tools.base import Tool
+    from ariadne_code.tools.base import Tool
 
     class _Boom(Tool):
         name = "boom"

@@ -160,7 +160,7 @@ export default function App() {
         <div className="brand">
           <Server size={18} />
           <div>
-            <div className="eyebrow">CoreCoder</div>
+            <div className="eyebrow">Ariadne</div>
             <strong>代码阅读助手</strong>
           </div>
         </div>

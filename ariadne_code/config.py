@@ -41,7 +41,7 @@ class Config:
         _load_dotenv()
         # pick up common env vars automatically
         api_key = (
-            os.getenv("CORECODER_API_KEY")
+            os.getenv("ARIADNE_API_KEY")
             or os.getenv("OPENAI_API_KEY")
             or os.getenv("DEEPSEEK_API_KEY")
             or os.getenv("ANTHROPIC_AUTH_TOKEN")
@@ -50,24 +50,24 @@ class Config:
         )
         base_url = (
             os.getenv("OPENAI_BASE_URL")
-            or os.getenv("CORECODER_BASE_URL")
+            or os.getenv("ARIADNE_BASE_URL")
             or _openai_compatible_base_url(os.getenv("ANTHROPIC_BASE_URL"))
         )
         return cls(
-            model=os.getenv("CORECODER_MODEL") or os.getenv("ANTHROPIC_MODEL") or "gpt-5.5",
+            model=os.getenv("ARIADNE_MODEL") or os.getenv("ANTHROPIC_MODEL") or "gpt-5.5",
             api_key=api_key,
             base_url=base_url,
-            max_tokens=int(os.getenv("CORECODER_MAX_TOKENS", "4096")),
-            temperature=float(os.getenv("CORECODER_TEMPERATURE", "0")),
-            max_context_tokens=int(os.getenv("CORECODER_MAX_CONTEXT", "128000")),
-            provider=os.getenv("CORECODER_PROVIDER", "openai"),
+            max_tokens=int(os.getenv("ARIADNE_MAX_TOKENS", "4096")),
+            temperature=float(os.getenv("ARIADNE_TEMPERATURE", "0")),
+            max_context_tokens=int(os.getenv("ARIADNE_MAX_CONTEXT", "128000")),
+            provider=os.getenv("ARIADNE_PROVIDER", "openai"),
         )
 
 
 def _openai_compatible_base_url(base_url: str | None) -> str | None:
     """Accept Claude/Anthropic-style env vars when the host also speaks OpenAI.
 
-    CoreCoder's default LLM backend uses OpenAI-compatible Chat Completions.
+    Ariadne's default LLM backend uses OpenAI-compatible Chat Completions.
     Some users already have Claude Code style variables such as
     ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic. DeepSeek exposes the
     same account through an OpenAI-compatible root URL, so remove the Anthropic

@@ -13,7 +13,7 @@ from .chunker import SKIP_DIRS, chunk_file, is_indexable
 from .embedder import Embedder
 from .store import VectorStore, file_digest
 
-INDEX_DIRNAME = ".corecoder_index"
+INDEX_DIRNAME = ".ariadne_index"
 INDEX_FILENAME = "index.db"
 BATCH = 64
 

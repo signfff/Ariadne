@@ -13,7 +13,7 @@ def system_prompt(tools, extra_instructions: str | None = None) -> str:
         profile_block = f"\n# Profile Instructions\n{extra_instructions.strip()}\n"
 
     return f"""\
-You are CoreCoder, an AI coding assistant running in the user's terminal.
+You are Ariadne, an AI coding assistant running in the user's terminal.
 You help with software engineering: writing code, fixing bugs, refactoring, explaining code, running commands, and more.
 
 # Environment

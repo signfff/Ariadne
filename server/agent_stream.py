@@ -24,10 +24,10 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from corecoder.agent import Agent
-from corecoder.config import Config
-from corecoder.llm import LLM, LiteLLM
-from corecoder.profiles import get_profile, tools_for_profile
+from ariadne_code.agent import Agent
+from ariadne_code.config import Config
+from ariadne_code.llm import LLM, LiteLLM
+from ariadne_code.profiles import get_profile, tools_for_profile
 
 _RUN_LOCK = threading.Lock()
 _QUEUE_MAXSIZE = 512
@@ -47,7 +47,7 @@ def build_agent(profile_name: str) -> tuple[Agent, LLM]:
     config = Config.from_env()
     if not config.api_key:
         raise RuntimeError(
-            "No API key found. Set CORECODER_API_KEY, OPENAI_API_KEY, or DEEPSEEK_API_KEY."
+            "No API key found. Set ARIADNE_API_KEY, OPENAI_API_KEY, or DEEPSEEK_API_KEY."
         )
 
     llm_cls = LiteLLM if config.provider == "litellm" else LLM

@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-from corecoder.agent import Agent
-from corecoder.llm import LLMResponse, ToolCall
-from corecoder.tools.base import Tool
+from ariadne_code.agent import Agent
+from ariadne_code.llm import LLMResponse, ToolCall
+from ariadne_code.tools.base import Tool
 from server.agent_stream import stream_agent
 
 

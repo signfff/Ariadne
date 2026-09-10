@@ -31,7 +31,7 @@ jobs:
         run: python -m pytest tests/ -v
 
       - name: Compile
-        run: python -m compileall -q corecoder tests
+        run: python -m compileall -q ariadne_code tests
 
   package:
     runs-on: ubuntu-latest
@@ -64,4 +64,4 @@ jobs:
           python -m pip install -e ".[dev]"
 
       - name: Ruff check
-        run: ruff check corecoder server tests
+        run: ruff check ariadne_code server tests

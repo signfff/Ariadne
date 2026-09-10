@@ -25,7 +25,7 @@ SKIP_SUFFIXES = (".min.js", ".min.css", ".bundle.js", ".map")
 SKIP_DIRS = {
     ".git", ".venv", "venv", "node_modules", "__pycache__", ".tox",
     "dist", "build", ".pytest_cache", ".ruff_cache", ".mypy_cache",
-    ".idea", ".next", "target", ".corecoder_index", ".claude", ".vscode",
+    ".idea", ".next", "target", ".ariadne_index", ".claude", ".vscode",
 }
 
 INDEXABLE_EXTS = {

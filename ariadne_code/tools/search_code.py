@@ -61,7 +61,7 @@ class SearchCodeTool(Tool):
         if not index_path(root).exists():
             return (
                 "No index for this project yet. Build one with:\n"
-                "  corecoder-index\n"
+                "  ariadne-index\n"
                 "Until then, use grep and glob."
             )
 

@@ -1,4 +1,4 @@
-"""`corecoder index` - build or refresh a project's semantic index."""
+"""`ariadne index` - build or refresh a project's semantic index."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        prog="corecoder index",
+        prog="ariadne index",
         description="Index a project for semantic code search. Runs locally; no API key needed.",
     )
     parser.add_argument("path", nargs="?", default=".", help="Project folder (default: current)")

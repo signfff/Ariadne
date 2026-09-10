@@ -14,7 +14,7 @@ def client():
 
 def test_health_reports_resolved_config(client):
     body = client.get("/api/health").json()
-    assert body["app"] == "CoreCoder"
+    assert body["app"] == "Ariadne"
     assert body["profiles"] == ["learn", "ask", "review"]
     assert set(body["runtime"]) == {"api_key_present", "model", "base_url", "provider"}
 
