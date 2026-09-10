@@ -63,6 +63,17 @@ python -m uvicorn server.main:app --reload    # http://127.0.0.1:8000
 
 Interactive API docs at `http://127.0.0.1:8000/docs`.
 
+React client (second terminal):
+
+```bash
+cd web
+npm install
+npm run dev        # http://127.0.0.1:5173
+```
+
+Vite proxies `/api` to the server, so the browser sees a single origin and the
+SSE stream passes through untouched.
+
 Legacy browser UI (stdlib server, no streaming — being replaced by the React client):
 
 ```bash
@@ -99,7 +110,16 @@ server/
 ├── agent_stream.py # blocking agent loop -> SSE event stream
 ├── projects.py     # project scanning and file reads
 └── schemas.py      # Pydantic request/response models
+
+web/
+├── src/api.js      # fetch + ReadableStream SSE client
+├── src/App.jsx     # project, file viewer, and chat state
+└── src/components/ # FileTree, CodeViewer, ChatPanel, ToolTimeline
 ```
+
+The browser's `EventSource` only issues GET requests, but `/api/chat` is a POST
+carrying a JSON body, so `web/src/api.js` reads the response with
+`fetch` + `ReadableStream` and parses the SSE frames itself.
 
 `Agent.chat()` is the whole thing: ask the model, run whatever tools it asks for,
 append the results, ask again — until it replies with plain text.
