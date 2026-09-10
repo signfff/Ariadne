@@ -80,8 +80,8 @@ code that does X" - the question you actually have in an unfamiliar repo.
 
 ```bash
 pip install -e ".[rag]"
-corecoder index            # index the current folder
-corecoder index --rebuild  # start over
+corecoder-index            # index the current folder
+corecoder-index --rebuild  # start over
 ```
 
 Indexing runs **entirely on your machine** - a small ONNX embedding model on the
@@ -128,7 +128,7 @@ corecoder/
 ├── prompt.py     # system prompt
 ├── cli.py        # terminal REPL
 ├── web.py        # legacy stdlib server (superseded by server/)
-├── index_cli.py  # `corecoder index`
+├── index_cli.py  # `corecoder-index`
 ├── rag/
 │   ├── chunker.py  # split by AST, embed a prose card rather than raw source
 │   ├── embedder.py # local ONNX embeddings
