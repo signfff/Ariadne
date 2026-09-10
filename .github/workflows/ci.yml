@@ -58,7 +58,10 @@ jobs:
           cache: pip
 
       - name: Install ruff
-        run: python -m pip install -U pip ruff
+        # version comes from the dev extra, so CI and local agree
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e ".[dev]"
 
       - name: Ruff check
-        run: ruff check corecoder tests
+        run: ruff check corecoder server tests

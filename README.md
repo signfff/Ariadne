@@ -42,6 +42,7 @@ Claude Code style variables (`ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`,
 | `CORECODER_MODEL` | `gpt-5.5` | Model name |
 | `CORECODER_MAX_CONTEXT` | `128000` | Context budget before compression kicks in |
 | `CORECODER_PROVIDER` | `openai` | Set to `litellm` for non-OpenAI-compatible providers |
+| `CORECODER_PRICING` | — | Token rates for models the built-in table does not know, e.g. `model-a:0.55,2.19; model-b:0.1,0.4` (USD per million in,out) |
 
 ## Use
 
@@ -54,24 +55,85 @@ corecoder -p "这个项目的入口在哪，主流程怎么走的"   # one-shot
 corecoder -r <session-id>                    # resume a saved session
 ```
 
-Browser:
+Browser — build once, then one command serves the API and the UI on one port:
 
 ```bash
-corecoder-web        # then open http://127.0.0.1:8765
+pip install -e ".[server]"
+cd web && npm install && npm run build && cd ..
+corecoder-server                  # http://127.0.0.1:8000
 ```
 
-Pick a folder, browse the file tree, and let the agent walk you through the project.
+Interactive API docs at `http://127.0.0.1:8000/docs`.
+
+Developing the client instead? Run Vite for hot reload — it proxies `/api` back
+to the server, so the browser still sees a single origin:
+
+```bash
+corecoder-server                  # terminal 1
+cd web && npm run dev             # terminal 2 -> http://127.0.0.1:5173
+```
+
+## Semantic search
+
+`grep` answers "where does this string appear". The index answers "where is the
+code that does X" - the question you actually have in an unfamiliar repo.
+
+```bash
+pip install -e ".[rag]"
+corecoder-index            # index the current folder
+corecoder-index --rebuild  # start over
+```
+
+Indexing runs **entirely on your machine** - a small ONNX embedding model on the
+CPU. No API key, no per-token cost, and your chat provider's quota is untouched.
+The index is one SQLite file under `.corecoder_index/`, and re-running only
+re-embeds files whose contents changed.
+
+The model weights download from HuggingFace on first use. If that is blocked:
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+export HF_HUB_DISABLE_XET=1
+```
+
+Retrieval fuses two arms with Reciprocal Rank Fusion: dense vectors find the
+concept, SQLite FTS5 BM25 pins the exact identifier. The agent reaches it
+through the `search_code` tool, which every read-only profile has.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `CORECODER_EMBED_MODEL` | `BAAI/bge-small-zh-v1.5` | Embedding model |
+| `HF_ENDPOINT` | HuggingFace | Mirror for weight downloads |
+
+## Project overview
+
+Opening a project first shows a structural read of it, computed from the files
+alone - no model call, so it is instant, free, and works before a key is set:
+
+- what it is written in, and how much of each
+- where execution starts, including console scripts declared in `pyproject.toml`
+- **which modules everything else is built on**, ranked by how many other files
+  import them - a better guide to what matters than size or commit count
+- a **reading route** derived from that graph: docs, then config, then entry
+  points, then the load-bearing modules, each with the reason it is there
+- files nothing imports and that import nothing, which can wait
+
+Every row opens that file. Because the route comes from the import graph rather
+than the model, it cannot cite a file that does not exist.
 
 ## Profiles
 
 | Profile | Tools | For |
 |---|---|---|
-| `learn` | read / glob / grep | Explaining a project to someone picking it up |
-| `ask` | read / glob / grep | Q&A about architecture and implementation |
-| `review` | read / glob / grep | Finding bugs, risks, and missing tests |
+| `learn` | read / glob / grep / search_code | Explaining a project to someone picking it up |
+| `ask` | read / glob / grep / search_code | Q&A about architecture and implementation |
+| `review` | read / glob / grep / search_code | Finding bugs, risks, and missing tests |
 | `full` | + write / edit / bash / sub-agent | When you also want it to change things |
 
-The three read-only profiles answer in Chinese by default and cite the files they read.
+The three read-only profiles answer in Chinese by default and cite the files
+they read. Each one carries its own openers - reading route, concept glossary,
+explain this file, review this file - so the difference between them is visible
+rather than buried in a system prompt.
 
 ## How it works
 
@@ -84,9 +146,30 @@ corecoder/
 ├── session.py    # save/resume conversations under ~/.corecoder/sessions
 ├── prompt.py     # system prompt
 ├── cli.py        # terminal REPL
-├── web.py        # stdlib HTTP server + JSON API
-└── tools/        # bash, read_file, write_file, edit_file, glob, grep, agent
+├── web.py        # legacy stdlib server (superseded by server/)
+├── index_cli.py  # `corecoder-index`
+├── rag/
+│   ├── chunker.py  # split by AST, embed a prose card rather than raw source
+│   ├── embedder.py # local ONNX embeddings
+│   ├── store.py    # SQLite chunks + vectors + FTS5
+│   └── indexer.py  # incremental build, RRF fusion
+└── tools/        # bash, read, write, edit, glob, grep, search_code, agent
+
+server/
+├── main.py         # FastAPI app
+├── agent_stream.py # blocking agent loop -> SSE event stream
+├── projects.py     # project scanning and file reads
+└── schemas.py      # Pydantic request/response models
+
+web/
+├── src/api.js      # fetch + ReadableStream SSE client
+├── src/App.jsx     # project, file viewer, and chat state
+└── src/components/ # FileTree, CodeViewer, ChatPanel, ToolTimeline
 ```
+
+The browser's `EventSource` only issues GET requests, but `/api/chat` is a POST
+carrying a JSON body, so `web/src/api.js` reads the response with
+`fetch` + `ReadableStream` and parses the SSE frames itself.
 
 `Agent.chat()` is the whole thing: ask the model, run whatever tools it asks for,
 append the results, ask again — until it replies with plain text.
@@ -104,9 +187,9 @@ append the results, ask again — until it replies with plain text.
 ## Develop
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]"     # pulls in the server and rag extras too
 pytest tests/ -q
-ruff check corecoder tests
+ruff check corecoder server tests
 ```
 
 ## License

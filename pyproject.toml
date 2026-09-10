@@ -35,15 +35,31 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["corecoder"]
+packages = ["corecoder", "server"]
 
 [project.optional-dependencies]
 litellm = ["litellm>=1.60.0,<2.0.0"]
-dev = ["pytest>=7.0", "ruff>=0.9.0"]
+server = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+]
+rag = [
+    "fastembed>=0.4",
+    "numpy>=1.24",
+]
+dev = [
+    "corecoder[server,rag]",
+    "pytest>=7.0",
+    "httpx>=0.27",
+    # pinned: ruff's default rule set widens between releases, and an
+    # unpinned lint job turns red on code nobody touched
+    "ruff==0.16.6",
+]
 
 [project.scripts]
 corecoder = "corecoder.cli:main"
-corecoder-web = "corecoder.web:main"
+corecoder-server = "server.main:main"
+corecoder-index = "corecoder.index_cli:main"
 
 [project.urls]
 Homepage = "https://github.com/he-yufeng/CoreCoder"
@@ -53,3 +69,22 @@ Issues = "https://github.com/he-yufeng/CoreCoder/issues"
 [tool.ruff]
 line-length = 130
 target-version = "py310"
+
+[tool.ruff.lint]
+# Chosen explicitly: relying on ruff's defaults means the enabled set silently
+# changes on upgrade.
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    # Tools deliberately catch everything and hand the message back to the
+    # model as text - a crashing tool would end the run instead.
+    "BLE001",
+    # Tool subclasses declare `parameters` as a plain class attribute; that is
+    # the schema declaration, not accidental shared state.
+    "RUF012",
+    # User-facing strings are Chinese; full-width punctuation is correct there,
+    # not an ambiguous-character mistake.
+    "RUF001", "RUF002", "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B018"]  # bare attribute access is how a lazy property gets forced

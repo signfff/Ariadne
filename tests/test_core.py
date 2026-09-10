@@ -1,9 +1,9 @@
 """Tests for core modules: config, context, session, imports."""
 
-from corecoder import Agent, LLM, Config, ALL_TOOLS, PROFILES, tools_for_profile, __version__
+from corecoder import ALL_TOOLS, LLM, PROFILES, Agent, Config, __version__, tools_for_profile
 from corecoder import session as session_module
 from corecoder.context import ContextManager, estimate_tokens
-from corecoder.session import save_session, load_session, list_sessions
+from corecoder.session import list_sessions, load_session, save_session
 from corecoder.tools import get_tool
 
 
@@ -16,7 +16,7 @@ def test_public_api_exports():
     assert Agent is not None
     assert LLM is not None
     assert Config is not None
-    assert len(ALL_TOOLS) == 7
+    assert len(ALL_TOOLS) == 8
     assert "review" in PROFILES
 
 
@@ -227,7 +227,7 @@ def test_agent_tool_scope_is_per_instance():
 def test_read_only_profiles_expose_only_search_and_read_tools():
     for profile in ("ask", "review"):
         tools = tools_for_profile(profile)
-        assert [t.name for t in tools] == ["read_file", "glob", "grep"]
+        assert [t.name for t in tools] == ["read_file", "glob", "grep", "search_code"]
 
 
 def test_full_profile_exposes_all_tools():

@@ -11,12 +11,13 @@ which means it's done working and ready to report back.
 
 import concurrent.futures
 import inspect
-from .llm import LLM
-from .tools import ALL_TOOLS
-from .tools.base import Tool
-from .tools.agent import AgentTool
-from .prompt import system_prompt
+
 from .context import ContextManager
+from .llm import LLM
+from .prompt import system_prompt
+from .tools import ALL_TOOLS
+from .tools.agent import AgentTool
+from .tools.base import Tool
 
 
 class Agent:
@@ -42,13 +43,19 @@ class Agent:
                 t._parent_agent = self
 
     def _full_messages(self) -> list[dict]:
-        return [{"role": "system", "content": self._system}] + self.messages
+        return [{"role": "system", "content": self._system}, *self.messages]
 
     def _tool_schemas(self) -> list[dict]:
         return [t.schema() for t in self.tools]
 
-    def chat(self, user_input: str, on_token=None, on_tool=None) -> str:
-        """Process one user message. May involve multiple LLM/tool rounds."""
+    def chat(self, user_input: str, on_token=None, on_tool=None, on_tool_result=None) -> str:
+        """Process one user message. May involve multiple LLM/tool rounds.
+
+        Callbacks let a caller watch the run as it happens:
+          on_token(text)             - one streamed chunk of assistant text
+          on_tool(name, args)        - a tool is about to run
+          on_tool_result(name, out)  - that tool returned
+        """
         self.messages.append({"role": "user", "content": user_input})
         self.context.maybe_compress(self.messages, self.llm)
 
@@ -73,6 +80,8 @@ class Agent:
                     if on_tool:
                         on_tool(tc.name, tc.arguments)
                     result = self._exec_tool(tc)
+                    if on_tool_result:
+                        on_tool_result(tc.name, result)
                     self.messages.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
@@ -81,7 +90,9 @@ class Agent:
                 else:
                     # parallel execution for multiple tool calls
                     results = self._exec_tools_parallel(resp.tool_calls, on_tool)
-                    for tc, result in zip(resp.tool_calls, results):
+                    for tc, result in zip(resp.tool_calls, results, strict=True):
+                        if on_tool_result:
+                            on_tool_result(tc.name, result)
                         self.messages.append({
                             "role": "tool",
                             "tool_call_id": tc.id,
