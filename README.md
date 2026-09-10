@@ -80,13 +80,45 @@ Legacy browser UI (stdlib server, no streaming — being replaced by the React c
 corecoder-web        # then open http://127.0.0.1:8765
 ```
 
+## Semantic search
+
+`grep` answers "where does this string appear". The index answers "where is the
+code that does X" - the question you actually have in an unfamiliar repo.
+
+```bash
+pip install -e ".[rag]"
+corecoder index            # index the current folder
+corecoder index --rebuild  # start over
+```
+
+Indexing runs **entirely on your machine** - a small ONNX embedding model on the
+CPU. No API key, no per-token cost, and your chat provider's quota is untouched.
+The index is one SQLite file under `.corecoder_index/`, and re-running only
+re-embeds files whose contents changed.
+
+The model weights download from HuggingFace on first use. If that is blocked:
+
+```bash
+export HF_ENDPOINT=https://hf-mirror.com
+export HF_HUB_DISABLE_XET=1
+```
+
+Retrieval fuses two arms with Reciprocal Rank Fusion: dense vectors find the
+concept, SQLite FTS5 BM25 pins the exact identifier. The agent reaches it
+through the `search_code` tool, which every read-only profile has.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `CORECODER_EMBED_MODEL` | `BAAI/bge-small-zh-v1.5` | Embedding model |
+| `HF_ENDPOINT` | HuggingFace | Mirror for weight downloads |
+
 ## Profiles
 
 | Profile | Tools | For |
 |---|---|---|
-| `learn` | read / glob / grep | Explaining a project to someone picking it up |
-| `ask` | read / glob / grep | Q&A about architecture and implementation |
-| `review` | read / glob / grep | Finding bugs, risks, and missing tests |
+| `learn` | read / glob / grep / search_code | Explaining a project to someone picking it up |
+| `ask` | read / glob / grep / search_code | Q&A about architecture and implementation |
+| `review` | read / glob / grep / search_code | Finding bugs, risks, and missing tests |
 | `full` | + write / edit / bash / sub-agent | When you also want it to change things |
 
 The three read-only profiles answer in Chinese by default and cite the files they read.
@@ -103,7 +135,13 @@ corecoder/
 ├── prompt.py     # system prompt
 ├── cli.py        # terminal REPL
 ├── web.py        # legacy stdlib server (superseded by server/)
-└── tools/        # bash, read_file, write_file, edit_file, glob, grep, agent
+├── index_cli.py  # `corecoder index`
+├── rag/
+│   ├── chunker.py  # split by AST, embed a prose card rather than raw source
+│   ├── embedder.py # local ONNX embeddings
+│   ├── store.py    # SQLite chunks + vectors + FTS5
+│   └── indexer.py  # incremental build, RRF fusion
+└── tools/        # bash, read, write, edit, glob, grep, search_code, agent
 
 server/
 ├── main.py         # FastAPI app

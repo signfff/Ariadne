@@ -43,12 +43,17 @@ server = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
 ]
+rag = [
+    "fastembed>=0.4",
+    "numpy>=1.24",
+]
 dev = ["pytest>=7.0", "ruff>=0.9.0", "httpx>=0.27"]
 
 [project.scripts]
 corecoder = "corecoder.cli:main"
 corecoder-web = "corecoder.web:main"
 corecoder-server = "server.main:main"
+corecoder-index = "corecoder.index_cli:main"
 
 [project.urls]
 Homepage = "https://github.com/he-yufeng/CoreCoder"

@@ -19,7 +19,14 @@ from corecoder.config import Config
 
 from . import projects
 from .agent_stream import build_agent, stream_agent
-from .schemas import ChatRequest, FileRequest, HealthResponse, ProjectRequest
+from .schemas import (
+    ChatRequest,
+    FileRequest,
+    HealthResponse,
+    IndexRequest,
+    ProjectRequest,
+    SearchRequest,
+)
 
 app = FastAPI(
     title="CoreCoder API",
@@ -84,6 +91,81 @@ def read_file(req: FileRequest):
         return projects.read_file(root, req.file)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.post("/api/index")
+def build_project_index(req: IndexRequest):
+    """Build or refresh the semantic index. Runs locally - no API key, no cost."""
+    from corecoder.rag import Embedder, EmbedderUnavailable, build_index, index_path, open_store
+
+    try:
+        root = projects.resolve_root(req.path)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    if req.rebuild and index_path(root).exists():
+        index_path(root).unlink()
+
+    try:
+        embedder = Embedder()
+        store = open_store(root, embedder)
+    except EmbedderUnavailable as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+
+    try:
+        stats = build_index(root, embedder, store)
+    finally:
+        store.close()
+
+    return {
+        "summary": stats.summary(),
+        "files_scanned": stats.files_scanned,
+        "files_indexed": stats.files_indexed,
+        "total_chunks": stats.total_chunks,
+        "model": embedder.model_name,
+    }
+
+
+@app.post("/api/search")
+def search_project(req: SearchRequest):
+    """Hybrid semantic + keyword search over the index."""
+    from corecoder.rag import Embedder, EmbedderUnavailable, hybrid_search, index_path, open_store
+
+    try:
+        root = projects.resolve_root(req.path)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    if not index_path(root).exists():
+        raise HTTPException(status_code=409, detail="No index for this project yet. Build one first.")
+
+    try:
+        embedder = Embedder()
+        store = open_store(root, embedder)
+    except EmbedderUnavailable as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+
+    try:
+        results = hybrid_search(store, embedder, req.query, top_k=req.top_k)
+    finally:
+        store.close()
+
+    return {
+        "query": req.query,
+        "hits": [
+            {
+                "path": hit.path,
+                "start_line": hit.start_line,
+                "end_line": hit.end_line,
+                "kind": hit.kind,
+                "name": hit.name,
+                "text": hit.text,
+                "score": score,
+                "arms": sorted(set(arms)),
+            }
+            for hit, score, arms in results
+        ],
+    }
 
 
 @app.post("/api/chat")

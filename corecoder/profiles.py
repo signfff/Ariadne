@@ -28,7 +28,7 @@ PROFILES: dict[str, AgentProfile] = {
     "learn": AgentProfile(
         name="learn",
         description="Read-only teaching mode for helping people understand a project.",
-        tool_names=("read_file", "glob", "grep"),
+        tool_names=("read_file", "glob", "grep", "search_code"),
         instructions=(
             "你处在只读教学模式。目标是帮助用户更快读懂项目，而不是查 bug 或修改代码。"
             "默认使用中文，讲解要面向正在接手项目的人。"
@@ -40,7 +40,7 @@ PROFILES: dict[str, AgentProfile] = {
     "ask": AgentProfile(
         name="ask",
         description="Read-only codebase Q&A mode for architecture and implementation questions.",
-        tool_names=("read_file", "glob", "grep"),
+        tool_names=("read_file", "glob", "grep", "search_code"),
         instructions=(
             "你处在只读项目问答模式。只能使用搜索和文件读取工具回答仓库问题。"
             "不要声称已经编辑文件、运行命令、安装依赖或修改工作区，因为这些工具在当前模式不可用。"
@@ -50,7 +50,7 @@ PROFILES: dict[str, AgentProfile] = {
     "review": AgentProfile(
         name="review",
         description="Read-only code review mode focused on bugs, risks, and missing tests.",
-        tool_names=("read_file", "glob", "grep"),
+        tool_names=("read_file", "glob", "grep", "search_code"),
         instructions=(
             "你处在只读代码审查模式。默认使用中文。"
             "结论必须优先列出具体问题，并按严重级别排序。"

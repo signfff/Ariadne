@@ -7,6 +7,7 @@ from .edit import EditFileTool
 from .glob_tool import GlobTool
 from .grep import GrepTool
 from .agent import AgentTool
+from .search_code import SearchCodeTool
 
 ALL_TOOLS = [
     BashTool(),
@@ -15,6 +16,7 @@ ALL_TOOLS = [
     EditFileTool(),
     GlobTool(),
     GrepTool(),
+    SearchCodeTool(),
     AgentTool(),
 ]
 

@@ -25,6 +25,17 @@ class ChatRequest(BaseModel):
     session_id: str | None = None
 
 
+class IndexRequest(BaseModel):
+    path: str = Field(..., min_length=1, description="Project root")
+    rebuild: bool = False
+
+
+class SearchRequest(BaseModel):
+    path: str = Field(..., min_length=1, description="Project root")
+    query: str = Field(..., min_length=1, max_length=500)
+    top_k: int = Field(6, ge=1, le=20)
+
+
 class RuntimeInfo(BaseModel):
     api_key_present: bool
     model: str
