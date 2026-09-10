@@ -1,22 +1,23 @@
 """Interactive REPL - the user-facing terminal interface."""
 
-import sys
-import os
 import argparse
+import contextlib
+import os
+import sys
 
-from rich.console import Console
-from rich.markdown import Markdown
-from rich.panel import Panel
 from prompt_toolkit import prompt as pt_prompt
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
 
-from .agent import Agent
-from .llm import LLM, LiteLLM
-from .config import Config
-from .session import save_session, load_session, list_sessions
-from .profiles import available_profiles, get_profile, tools_for_profile
 from . import __version__
+from .agent import Agent
+from .config import Config
+from .llm import LLM, LiteLLM
+from .profiles import available_profiles, get_profile, tools_for_profile
+from .session import list_sessions, load_session, save_session
 
 console = Console()
 
@@ -24,10 +25,8 @@ console = Console()
 def _ensure_utf8_stdio():
     """Keep Chinese prompts/output from failing under ASCII-only shells."""
     for stream in (sys.stdout, sys.stderr):
-        try:
+        with contextlib.suppress(AttributeError, ValueError):
             stream.reconfigure(encoding="utf-8")
-        except (AttributeError, ValueError):
-            pass
 
 
 def _parse_args():
@@ -75,7 +74,8 @@ def main():
             "  export OPENAI_API_KEY=sk-... OPENAI_BASE_URL=https://api.deepseek.com\n"
             "\n"
             "  # Claude Code / Anthropic-style env vars are also accepted\n"
-            "  export ANTHROPIC_AUTH_TOKEN=sk-... ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic ANTHROPIC_MODEL=deepseek-chat\n"
+            "  export ANTHROPIC_AUTH_TOKEN=sk-... ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic\n"
+            "  export ANTHROPIC_MODEL=deepseek-chat\n"
             "\n"
             "  # Ollama (local)\n"
             "  export OPENAI_API_KEY=ollama OPENAI_BASE_URL=http://localhost:11434/v1 CORECODER_MODEL=qwen2.5-coder\n"
@@ -256,8 +256,9 @@ def _repl(agent: Agent, config: Config):
         # call the agent
         streamed: list[str] = []
 
-        def on_token(tok):
-            streamed.append(tok)
+        # bound as a default so the callback cannot capture a later iteration
+        def on_token(tok, _out=streamed):
+            _out.append(tok)
             print(tok, end="", flush=True)
 
         def on_tool(name, kwargs):

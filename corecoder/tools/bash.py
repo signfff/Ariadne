@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import threading
+
 from .base import Tool
 
 # Track cwd across commands. Thread-local, so that when the agent executes

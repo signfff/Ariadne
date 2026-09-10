@@ -33,8 +33,8 @@ def main() -> int:
 
     try:
         embedder = Embedder()
-        # touch the model up front so a download failure reports before the walk
-        embedder.model
+        # load the model up front so a download failure reports before the walk
+        _ = embedder.model
     except EmbedderUnavailable as e:
         print(f"无法加载嵌入模型：\n{e}", file=sys.stderr)
         return 2

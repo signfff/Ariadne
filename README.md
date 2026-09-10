@@ -42,6 +42,7 @@ Claude Code style variables (`ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_BASE_URL`,
 | `CORECODER_MODEL` | `gpt-5.5` | Model name |
 | `CORECODER_MAX_CONTEXT` | `128000` | Context budget before compression kicks in |
 | `CORECODER_PROVIDER` | `openai` | Set to `litellm` for non-OpenAI-compatible providers |
+| `CORECODER_PRICING` | — | Token rates for models the built-in table does not know, e.g. `model-a:0.55,2.19; model-b:0.1,0.4` (USD per million in,out) |
 
 ## Use
 
@@ -167,9 +168,9 @@ append the results, ask again — until it replies with plain text.
 ## Develop
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]"     # pulls in the server and rag extras too
 pytest tests/ -q
-ruff check corecoder tests
+ruff check corecoder server tests
 ```
 
 ## License

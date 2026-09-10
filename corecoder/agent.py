@@ -11,12 +11,13 @@ which means it's done working and ready to report back.
 
 import concurrent.futures
 import inspect
-from .llm import LLM
-from .tools import ALL_TOOLS
-from .tools.base import Tool
-from .tools.agent import AgentTool
-from .prompt import system_prompt
+
 from .context import ContextManager
+from .llm import LLM
+from .prompt import system_prompt
+from .tools import ALL_TOOLS
+from .tools.agent import AgentTool
+from .tools.base import Tool
 
 
 class Agent:
@@ -42,7 +43,7 @@ class Agent:
                 t._parent_agent = self
 
     def _full_messages(self) -> list[dict]:
-        return [{"role": "system", "content": self._system}] + self.messages
+        return [{"role": "system", "content": self._system}, *self.messages]
 
     def _tool_schemas(self) -> list[dict]:
         return [t.schema() for t in self.tools]
@@ -89,7 +90,7 @@ class Agent:
                 else:
                     # parallel execution for multiple tool calls
                     results = self._exec_tools_parallel(resp.tool_calls, on_tool)
-                    for tc, result in zip(resp.tool_calls, results):
+                    for tc, result in zip(resp.tool_calls, results, strict=True):
                         if on_tool_result:
                             on_tool_result(tc.name, result)
                         self.messages.append({

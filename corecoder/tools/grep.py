@@ -2,6 +2,7 @@
 
 import re
 from pathlib import Path
+
 from .base import Tool
 
 # skip these dirs to avoid noise
@@ -43,10 +44,7 @@ class GrepTool(Tool):
         if not base.exists():
             return f"Error: {path} not found"
 
-        if base.is_file():
-            files = [base]
-        else:
-            files = self._walk(base, include)
+        files = [base] if base.is_file() else self._walk(base, include)
 
         matches = []
         for fp in files:

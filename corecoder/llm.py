@@ -10,10 +10,11 @@ single unified interface. Set CORECODER_PROVIDER=litellm.
 """
 
 import json
+import os
 import time
 from dataclasses import dataclass, field
 
-from openai import OpenAI, APIError, BadRequestError, RateLimitError, APITimeoutError, APIConnectionError
+from openai import APIConnectionError, APIError, APITimeoutError, BadRequestError, OpenAI, RateLimitError
 
 
 @dataclass
@@ -81,6 +82,32 @@ _PRICING = {
 }
 
 
+def _rates_for(model: str) -> tuple[float, float] | None:
+    """Per-million-token (input, output) rates for a model, or None if unknown.
+
+    Gateways and proxies rename models freely, so the built-in table cannot
+    cover every deployment. CORECODER_PRICING supplies rates for whatever the
+    endpoint actually serves:
+
+        CORECODER_PRICING="deepseek-v4-pro:0.55,2.19; deepseek-flash:0.1,0.4"
+
+    Reporting nothing is better than reporting a made-up number, so an unknown
+    model yields None and the UI simply omits the cost.
+    """
+    for entry in os.getenv("CORECODER_PRICING", "").split(";"):
+        entry = entry.strip()
+        if not entry or ":" not in entry:
+            continue
+        name, _, rates = entry.partition(":")
+        try:
+            inp, _, out = rates.partition(",")
+            if name.strip() == model:
+                return float(inp), float(out)
+        except ValueError:
+            continue  # a malformed entry should not break cost reporting
+    return _PRICING.get(model)
+
+
 class LLM:
     def __init__(
         self,
@@ -97,8 +124,8 @@ class LLM:
 
     @property
     def estimated_cost(self) -> float | None:
-        """Rough cost estimate in USD. Returns None if model not in pricing table."""
-        pricing = _PRICING.get(self.model)
+        """Rough cost estimate in USD. None when the model's rates are unknown."""
+        pricing = _rates_for(self.model)
         if not pricing:
             return None
         input_rate, output_rate = pricing

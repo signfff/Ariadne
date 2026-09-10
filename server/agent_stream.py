@@ -20,9 +20,9 @@ from __future__ import annotations
 import os
 import queue
 import threading
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 from corecoder.agent import Agent
 from corecoder.config import Config
