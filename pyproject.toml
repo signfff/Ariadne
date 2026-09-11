@@ -51,7 +51,7 @@ rag = [
     "numpy>=1.24",
 ]
 dev = [
-    "ariadne[server,rag]",
+    "ariadne-code[server,rag]",
     "pytest>=7.0",
     "httpx>=0.27",
     # pinned: ruff's default rule set widens between releases, and an

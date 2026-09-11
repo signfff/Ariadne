@@ -276,3 +276,27 @@ def test_interrupt_backfills_missing_tool_replies():
     ids = [m["tool_call_id"] for m in replies]
     assert sorted(ids) == ["a", "b"]
     assert ids.count("a") == 1  # the already-answered call wasn't duplicated
+
+
+def test_dev_extra_points_at_this_package():
+    """The dev extra self-references by name; a rename must update it.
+
+    When it drifts, pip happily installs whatever unrelated project owns that
+    name on PyPI and the missing extras only surface as ImportErrors in CI.
+    """
+    from pathlib import Path
+
+    import tomllib
+
+    pyproject = tomllib.loads(
+        (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(encoding="utf-8")
+    )
+    name = pyproject["project"]["name"]
+    extras = pyproject["project"]["optional-dependencies"]
+
+    referenced = [d for d in extras["dev"] if d.startswith(f"{name}[")]
+    assert referenced, f"dev extra must self-reference '{name}', got {extras['dev']}"
+
+    # and every extra it pulls in must exist
+    for extra in referenced[0].split("[", 1)[1].rstrip("]").split(","):
+        assert extra.strip() in extras, f"dev references unknown extra '{extra}'"
