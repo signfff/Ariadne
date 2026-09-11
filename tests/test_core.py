@@ -286,7 +286,12 @@ def test_dev_extra_points_at_this_package():
     """
     from pathlib import Path
 
-    import tomllib
+    import pytest
+
+    # tomllib is stdlib only from 3.11, and this project supports 3.10. The
+    # check does not depend on the interpreter, so skipping on 3.10 loses
+    # nothing - the other four versions still guard it.
+    tomllib = pytest.importorskip("tomllib", reason="stdlib tomllib needs Python 3.11+")
 
     pyproject = tomllib.loads(
         (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(encoding="utf-8")
